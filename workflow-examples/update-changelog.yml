@@ -1,0 +1,11 @@
+name: Update Changelog
+
+on:
+  release:
+    types: [released]
+
+jobs:
+  update_changelog:
+    name: Update Changelog
+    uses: verplankedev/.github/.github/workflows/update-changelog.yml@main
+

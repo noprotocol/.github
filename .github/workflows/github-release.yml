@@ -1,0 +1,36 @@
+name: Github Release
+
+on:
+  workflow_call:
+    secrets:
+      RELEASE_TOKEN:
+        description: 'Personal Access Token for creating a release at Github'
+        required: false
+
+jobs:
+  github_release:
+    if: ${{ github.ref == 'refs/heads/main' }} # guard, only run workflow on main branch
+
+    runs-on: ubuntu-22.04
+
+    name: Github Release
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm i -D semantic-release conventional-changelog-conventionalcommits
+
+      - name: Create Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }} # defined at ORG level at Github
+        run: npx semantic-release

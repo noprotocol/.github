@@ -1,0 +1,39 @@
+{
+  "branches": ["main"],
+  "tagFormat": "v${version}",
+  "plugins": [
+    [
+      "@semantic-release/commit-analyzer",
+      {
+        "releaseRules": [
+          {"type": "breaking", "release": "major"},
+          {"type": "feature", "release": "minor"},
+          {"type": "fix", "release": "patch"},
+          {"type": "hotfix", "release": "patch"},
+          {"type": "chore", "release": "patch"}
+        ]
+      }
+    ],
+    [
+      "@semantic-release/release-notes-generator",
+      {
+        "preset": "conventionalcommits",
+        "presetConfig": [
+          {"type": "feature", "section": "Features"},
+          {"type": "fix", "section": "Fixes"},
+          {"type": "hotfix", "section": "Fixes"},
+          {"type": "chore", "section": "Chores"}
+        ],
+        "writerOpts":{
+          "headerPartial": "## {{#if @root.linkCompare~}}\n  [v{{version}}](\n  {{~#if @root.repository~}}\n    {{~#if @root.host}}\n      {{~@root.host}}/\n    {{~/if}}\n    {{~#if @root.owner}}\n      {{~@root.owner}}/\n    {{~/if}}\n    {{~@root.repository}}\n  {{~else}}\n    {{~@root.repoUrl}}\n  {{~/if~}}\n  /compare/{{previousTag}}...{{currentTag}})\n{{~else}}\n  v{{~version}}\n{{~/if}}\n{{~#if title}} \"{{title}}\"\n{{~/if}}\n{{~#if date}} ({{date}})\n{{/if}}"
+        }
+      }
+    ],
+    [
+      "@semantic-release/github",
+      {
+        "releasedLabels": "v<%= nextRelease.gitTag %>"
+      }
+    ]
+  ]
+}

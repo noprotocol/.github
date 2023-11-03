@@ -1,0 +1,34 @@
+name: Code Style
+
+on:
+#  pull_request:
+#    branches:
+#      - main
+#      - develop
+#      - 'release/**'
+#      - 'feature/**'
+#      - 'hotfix/**'
+#      - 'fix/**'
+#    paths-ignore:
+#      - '**.md'
+
+  # use workflow_dispatch for now to fine-tune code style configurations
+  workflow_dispatch:
+    inputs:
+      php:
+        required: true
+        default: '8.2'
+        description: 'Fix code style using selected PHP version'
+        type: choice
+        options:
+          - '8.0'
+          - '8.1'
+          - '8.2'
+          - '8.3'
+
+jobs:
+  code_style:
+    name: Code Style
+    uses: verplankedev/.github/.github/workflows/php-code-style.yml@main
+    with:
+      php: ${{ inputs.php }}

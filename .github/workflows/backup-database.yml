@@ -1,0 +1,10 @@
+name: Create RDS Database Backup
+
+on:
+  workflow_call:
+
+jobs:
+  backup_database:
+    runs-on: ubuntu-22.04
+
+    name: Backup Database
