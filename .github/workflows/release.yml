@@ -1,0 +1,108 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    name: Release ${{ inputs.version }}
+
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      notes: ${{ steps.cleaned-notes.outputs.release-notes }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Remove optional "v" prefix
+        id: version
+        run: |
+          VERSION=${{ inputs.version }}
+          echo "version=${VERSION#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Generate release notes
+        id: generated-notes
+        uses: ./.github/actions/release-notes
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: v${{ steps.version.outputs.version }}
+          branch: ${{ github.ref_name }}
+
+      - name: Cleanup release notes
+        id: cleaned-notes
+        run: |
+          NOTES=$(echo $NOTES | sed '/## What/d')
+          NOTES=$(echo $NOTES | sed '/## New Contributors/,$d')
+          echo "release-notes=${NOTES}" >> "$GITHUB_OUTPUT"
+        env:
+          NOTES: ${{ steps.generated-notes.outputs.release-notes }}
+
+#      - name: Create release
+#        uses: softprops/action-gh-release@v2
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          tag_name: v${{ steps.version.outputs.version }}
+#          name: v${{ steps.version.outputs.version }}
+#          body: ${{ steps.cleaned-notes.outputs.release-notes }}
+#          target_commitish: ${{ github.ref_name }}
+#          make_latest: 'legacy'
+#
+#  update-changelog:
+#    needs: release
+#
+#    runs-on: ubuntu-latest
+#
+#    name: Update changelog
+#
+#    steps:
+#      - name: Update changelog
+#        uses: laravel/.github/.github/workflows/update-changelog.yml@main
+#        with:
+#          branch: ${{ github.ref_name }}
+#          version: "v${{ needs.release.outputs.version }}"
+#          notes: ${{ needs.release.outputs.notes }}
+#
+#  slack:
+#    needs: [release, update-changelog]
+#
+#    runs-on: ubuntu-latest
+#
+#    name: Notify via Slack
+#
+#    steps:
+#      - name: Notify via Slack
+#        uses: slackapi/slack-github-action@v1.24.0
+#        with:
+#
+#          # Comma separated list of channels ids
+#          channel-id: ${{ vars.SLACK_MONITORING_CHANNEL_IDS }}
+#          payload: |
+#            {
+#              "text": "Release v${{ needs.release.outputs.version }}",
+#              "attachments": [
+#                {
+#                  "pretext": "Release v${{ needs.release.outputs.version }} created",
+#                  "color": "dbab09",
+#                  "fields": [
+#                    {
+#                      "title": "Status",
+#                      "short": true,
+#                      "value": "Completed"
+#                    }
+#                  ]
+#                }
+#              ]
+#            }
+#        env:
+#          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN}}
