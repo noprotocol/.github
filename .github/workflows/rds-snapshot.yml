@@ -1,0 +1,34 @@
+name: RDS Snapshot
+
+on:
+  workflow_call:
+    inputs:
+      region:
+        description: 'AWS Region (eu-west-1)'
+        type: string
+        default: 'eu-west-1'
+
+jobs:
+  rds_snapshot:
+    if: ${{ startsWith(github.ref, 'refs/tags/') }} # guard, only tags are allowed to be deployed
+
+    runs-on: ubuntu-22.04
+
+    name: RDS Snapshot
+
+    steps:
+      - name: Run RDS snapshot script
+        run: |
+          chmod +x ./.github/scripts/rds-snapshot.sh
+          bash ./.github/scripts/rds-snapshot.sh
+        shell: bash
+        env:
+          APP_ENV: 'production'
+          AWS_RDS_DEFAULT_REGION: ${{ inputs.region }}
+          AWS_RDS_ACCESS_KEY_ID: ${{ secrets.AWS_RDS_ACCESS_KEY_ID }} # defined at ORG level
+          AWS_RDS_SECRET_ACCESS_KEY: ${{ secrets.AWS_RDS_SECRET_ACCESS_KEY }} # defined at ORG level
+          AWS_RDS_SNAPSHOT_SEARCH_ATTEMPTS: ${{ secrets.AWS_RDS_SNAPSHOT_SEARCH_ATTEMPTS }} # defined at ORG level
+          AWS_RDS_SNAPSHOT_SEARCH_DELAY: ${{ secrets.AWS_RDS_SNAPSHOT_SEARCH_DELAY }} # defined at ORG level
+          AWS_RDS_INSTANCE_ID: ${{ secrets.AWS_RDS_INSTANCE_ID }} # defined at REPO level
+
+

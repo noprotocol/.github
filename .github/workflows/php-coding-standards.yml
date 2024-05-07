@@ -35,7 +35,7 @@ jobs:
         run: composer global require laravel/pint
 
       - name: Run Laravel Pint
-        run: pint --config code-style/php/pint.json
+        run: pint --config ./.github/config/pint.json
 
       - name: Commit linted files
         if: ${{ inputs.fix }}

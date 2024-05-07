@@ -1,18 +1,18 @@
 name: Release
 
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
       version:
         description: 'Version to release'
-        required: true
+        type: string
 
 permissions:
   contents: write
 
 jobs:
   release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     name: Release ${{ inputs.version }}
 
@@ -23,6 +23,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Remove optional "v" prefix
         id: version
@@ -34,7 +36,7 @@ jobs:
         id: generated-notes
         uses: ./.github/actions/release-notes
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }} # defined at ORG level (PAT)
           tag_name: v${{ steps.version.outputs.version }}
           branch: ${{ github.ref_name }}
 
@@ -47,62 +49,46 @@ jobs:
         env:
           NOTES: ${{ steps.generated-notes.outputs.release-notes }}
 
-#      - name: Create release
-#        uses: softprops/action-gh-release@v2
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        with:
-#          tag_name: v${{ steps.version.outputs.version }}
-#          name: v${{ steps.version.outputs.version }}
-#          body: ${{ steps.cleaned-notes.outputs.release-notes }}
-#          target_commitish: ${{ github.ref_name }}
-#          make_latest: 'legacy'
-#
-#  update-changelog:
-#    needs: release
-#
-#    runs-on: ubuntu-latest
-#
-#    name: Update changelog
-#
-#    steps:
-#      - name: Update changelog
-#        uses: laravel/.github/.github/workflows/update-changelog.yml@main
-#        with:
-#          branch: ${{ github.ref_name }}
-#          version: "v${{ needs.release.outputs.version }}"
-#          notes: ${{ needs.release.outputs.notes }}
-#
-#  slack:
-#    needs: [release, update-changelog]
-#
-#    runs-on: ubuntu-latest
-#
-#    name: Notify via Slack
-#
-#    steps:
-#      - name: Notify via Slack
-#        uses: slackapi/slack-github-action@v1.24.0
-#        with:
-#
-#          # Comma separated list of channels ids
-#          channel-id: ${{ vars.SLACK_MONITORING_CHANNEL_IDS }}
-#          payload: |
-#            {
-#              "text": "Release v${{ needs.release.outputs.version }}",
-#              "attachments": [
-#                {
-#                  "pretext": "Release v${{ needs.release.outputs.version }} created",
-#                  "color": "dbab09",
-#                  "fields": [
-#                    {
-#                      "title": "Status",
-#                      "short": true,
-#                      "value": "Completed"
-#                    }
-#                  ]
-#                }
-#              ]
-#            }
-#        env:
-#          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN}}
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # defined at ORG level (PAT)
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: v${{ steps.version.outputs.version }}
+          body: ${{ steps.cleaned-notes.outputs.release-notes }}
+          target_commitish: ${{ github.ref_name }}
+          make_latest: 'legacy'
+
+  update-changelog:
+    needs: release
+
+    runs-on: ubuntu-22.04
+
+    name: Update changelog
+
+    steps:
+      - name: Update changelog
+        uses: ./.github/workflows/update-changelog.yml@main
+        with:
+          branch: ${{ github.ref_name }}
+          version: "v${{ needs.release.outputs.version }}"
+          notes: ${{ needs.release.outputs.notes }}
+
+  sentry:
+    needs: release
+
+    runs-on: ubuntu-22.04
+
+    name: Sentry Release ${{ inputs.version }}
+
+    steps:
+      - name: Create Sentry Release
+        uses: getsentry/action-release@v1
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }} # defined at ORG level at Github
+          SENTRY_ORG: ${{ vars.SENTRY_ORG }} # defined at ORG level at Github
+          SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT }} # defined at REPO level at Github
+        with:
+          environment: production
+          version: ${{ github.event.release.tag_name }}

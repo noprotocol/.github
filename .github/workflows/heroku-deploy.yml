@@ -2,10 +2,6 @@ name: Deploy to Heroku
 
 on:
   workflow_call:
-    secrets:
-      HEROKU_API_KEY:
-        description: 'API Key for Heroku API'
-        required: false
 
 jobs:
   deploy_to_heroku:
@@ -22,15 +18,11 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.ref }}
 
-      - name: Log deployment
-        run: echo 'Deployment started by ${{ github.actor }}'
-        env:
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-
-      - uses: akhileshns/heroku-deploy@v3.12.14
+      - name: Deploying ${{ github.ref_name }}
+        uses: akhileshns/heroku-deploy@v3.13.15
         with:
-          heroku_api_key: ${{ secrets.HEROKU_API_KEY }} # defined at ORG level at Github
           heroku_app_name: ${{ vars.HEROKU_APP_NAME }} # defined at REPO level at Github
-          heroku_email: devops@noprotocol.nl
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }} # defined at ORG level at Github
+          heroku_email: ${{ vars.HEROKU_EMAIL }} # defined at ORG level at Github
           team: ${{ vars.HEROKU_ORG }} # defined at ORG level at Github
-          branch: ${{ github.ref }}
+          branch: ${{ github.ref }} # refs/tags/v1.2.3

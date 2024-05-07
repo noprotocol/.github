@@ -1,6 +1,5 @@
 import { debug, getInput, setFailed, setOutput } from "@actions/core";
 import { getOctokit, context } from "@actions/github";
-
 import { env } from "process";
 
 async function run () {
@@ -20,11 +19,11 @@ async function run () {
     }) || env.INPUT_BRANCH || 'main'
 
     if (! token) {
-      setFailed('Input "token" is required');
+      throw new Error('Input "token" is required');
     }
 
     if (! tagName) {
-      setFailed('Input "tag_name" is required');
+      throw new Error('Input "tag_name" is required');
     }
 
     const github = getOctokit(token);

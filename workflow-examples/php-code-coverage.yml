@@ -17,6 +17,6 @@ on:
 jobs:
   code_coverage:
     name: Code Coverage
-    uses: verplankedev/.github/.github/workflows/php-code-coverage.yml@main
+    uses: noprotocol/.github/.github/workflows/php-code-coverage.yml@main
     secrets:
       env_file: ${{ secrets.ENV_FILE }} # defined at REPO level at Github (contents of .env file)

@@ -2,6 +2,19 @@ name: Update Changelog
 
 on:
   workflow_call:
+    inputs:
+      branch:
+        description: 'Target branch'
+        default: ${{ github.event.release.target_commitish }}
+        type: string
+      version:
+        description: 'Released version'
+        default: ${{ github.event.release.tag_name }}
+        type: string
+      notes:
+        description: 'Release notes'
+        default: ${{ github.event.release.body }}
+        type: string
 
 jobs:
   update_changelog:
@@ -12,10 +25,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ github.event.release.target_commitish }}
+          ref: ${{ inputs.branch }}
 
       - name: Extract release date from git tag
         id: release_date
@@ -26,14 +39,14 @@ jobs:
         uses: stefanzweifel/changelog-updater-action@v1
         with:
           release-date: ${{ steps.release_date.outputs.date }}
-          release-notes: ${{ github.event.release.body }}
-          latest-version: ${{ github.event.release.tag_name }}
-          compare-url-target-revision: ${{ github.event.release.target_commitish }}
+          release-notes: ${{ inputs.notes }}
+          latest-version: ${{ inputs.version }}
+          compare-url-target-revision: ${{ inputs.branch }}
           parse-github-usernames: true
 
       - name: Commit updated CHANGELOG
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          branch: ${{ github.event.release.target_commitish }}
+          branch: ${{ inputs.branch }}
           commit_message: Update CHANGELOG
           file_pattern: CHANGELOG.md
