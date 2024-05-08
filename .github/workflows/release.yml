@@ -34,7 +34,7 @@ jobs:
 
       - name: Generate release notes
         id: generated-notes
-        uses: ./.github/actions/release-notes
+        uses: noprotocol/.github/.github/actions/release-notes
         with:
           token: ${{ secrets.GITHUB_TOKEN }} # defined at ORG level (PAT)
           tag_name: v${{ steps.version.outputs.version }}
@@ -69,7 +69,7 @@ jobs:
 
     steps:
       - name: Update changelog
-        uses: ./.github/workflows/update-changelog.yml@main
+        uses: noprotocol/.github/.github/actions/update-changelog.yml@main
         with:
           branch: ${{ github.ref_name }}
           version: "v${{ needs.release.outputs.version }}"
