@@ -63,17 +63,13 @@ jobs:
   update-changelog:
     needs: release
 
-    runs-on: ubuntu-22.04
-
     name: Update changelog
 
-    steps:
-      - name: Update changelog
-        uses: noprotocol/.github/.github/workflows/update-changelog.yml@main
-        with:
-          branch: ${{ github.ref_name }}
-          version: "v${{ needs.release.outputs.version }}"
-          notes: ${{ needs.release.outputs.notes }}
+    uses: noprotocol/.github/.github/workflows/update-changelog.yml@main
+    with:
+      branch: ${{ github.ref_name }}
+      version: "v${{ needs.release.outputs.version }}"
+      notes: ${{ needs.release.outputs.notes }}
 
   sentry:
     needs: release
