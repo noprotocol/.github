@@ -34,7 +34,7 @@ jobs:
 
       - name: Generate release notes
         id: generated-notes
-        uses: noprotocol/.github/.github/actions/release-notes
+        uses: noprotocol/.github/.github/actions/release-notes@main
         with:
           token: ${{ secrets.GITHUB_TOKEN }} # defined at ORG level (PAT)
           tag_name: v${{ steps.version.outputs.version }}
