@@ -69,7 +69,7 @@ jobs:
 
     steps:
       - name: Update changelog
-        uses: noprotocol/.github/.github/actions/update-changelog.yml@main
+        uses: noprotocol/.github/.github/workflows/update-changelog.yml@main
         with:
           branch: ${{ github.ref_name }}
           version: "v${{ needs.release.outputs.version }}"
@@ -83,6 +83,11 @@ jobs:
     name: Sentry Release ${{ inputs.version }}
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Create Sentry Release
         uses: getsentry/action-release@v1
         env:
