@@ -1,0 +1,25 @@
+{
+  "preset": "per",
+  "rules": {
+    "concat_space": {
+      "spacing": "one"
+    },
+    "declare_strict_types": true,
+    "fully_qualified_strict_types": {
+      "phpdoc_tags": []
+    },
+    "function_declaration": {
+      "closure_function_spacing": "one"
+    },
+    "not_operator_with_successor_space": true,
+    "no_unused_imports": true,
+    "no_superfluous_phpdoc_tags": {
+      "allow_mixed": true,
+      "remove_inheritdoc": true
+    },
+    "ordered_interfaces": true,
+    "ordered_traits": true,
+    "strict_comparison": true,
+    "strict_param": true
+  }
+}

@@ -1,4 +1,2 @@
 .idea
 .DS_Store
-.github/actions/release-notes/node_modules
-.github/actions/heroku-deployment/node_modules
